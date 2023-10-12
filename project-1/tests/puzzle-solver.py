@@ -5,7 +5,6 @@ import argparse
 
 from itertools import permutations
 from time import time
-import matplotlib.pyplot as plt
 
 
 GamePlan = List[int]
@@ -65,6 +64,9 @@ def heuristic_manhattan_distance(game_plan: GamePlan) -> int:
 
 
 def is_solvable(game_plan: GamePlan) -> int:
+    """
+        verify if game is solvable
+    """
     inversions = 0
     game_plan_length = len(game_plan)
     # get total number of inversions
@@ -78,42 +80,16 @@ def is_solvable(game_plan: GamePlan) -> int:
 def test_is_solvable():
     permutations_list = list(permutations(range(9)))
     # Filter out the permutations that are not solvable
-    not_solvable = [p for p in permutations_list if is_solvable(p)]
+    not_solvable = [p for p in permutations_list if not is_solvable(p)]
     # Convert the not solvable permutations to a list
     not_solvable_list = [list(p) for p in not_solvable]
-    index = 0
 
-    x_h1 = []
-    y_h1 = []
-
-    x_h2 = []
-    y_h2 = []
     for combination in not_solvable_list:
-        index += 1
-        x_h1.append(index)
-        start_time = time()
-        solve_puzzle(combination, heuristic_misplaced_positions)
-        end_time = time()
-        execution_time = end_time - start_time
-        y_h1.append(execution_time)
+        assert(solve_puzzle(combination, heuristic_manhattan_distance) is None)
+        assert(solve_puzzle(combination, heuristic_misplaced_positions) is None)
+    print('Tests passed')
+    
 
-        x_h2.append(index)
-        start_time = time()
-        solve_puzzle(combination, heuristic_manhattan_distance)
-        end_time = time()
-        execution_time = end_time - start_time
-        y_h2.append(execution_time)
-        if index == 100:
-            break
-
-    plt.plot(x_h1, y_h1, color='red', label='Heuristic: Misplaced positions')
-    plt.plot(x_h2, y_h2, color='blue', label='Heuristic: Manhattan distance')
-    plt.legend()
-
-    plt.xlabel("Combination")
-    plt.ylabel("Time to solve [s]")
-    plt.title("Execution analysis of 8 puzzle problem for 100 stories")
-    plt.show()
 
 def get_neighbors_of_blank_tile(game_plan_side_length: int, empty_tile_index: int) -> List[int]:
     neighbors: List[int] = []
@@ -133,6 +109,9 @@ def get_neighbors_of_blank_tile(game_plan_side_length: int, empty_tile_index: in
 
 
 def solve_puzzle(initial_state: GamePlan, heuristic: Callable[[GamePlan], int]) -> Optional[List[GamePlan]]:
+    """
+        solve 8 puzzle problem
+    """
     game_plan_length = len(initial_state)
     game_plan_side_length = int(sqrt(game_plan_length))
     if not is_solvable(initial_state):
@@ -204,8 +183,8 @@ def print_solution_steps(steps: List[GamePlan]):
 
 
 def parse_user_options():
-    parser = argparse.ArgumentParser(description='8 - puzzle problem solver')
-    parser.add_argument('-s', '--initial-state', type=str, help='initial state of the puzzle')
+    parser = argparse.ArgumentParser(description='Puzzle Solver - 8 puzzle problem solver')
+    parser.add_argument('-s', '--initial-state', type=str, default="0,1,2,3,4,5,6,7,8", help='initial state of the puzzle')
     parser.add_argument('-t', '--heuristic', type=int, choices=[1, 2], default=1, help='\
                         Specify heuristic function OPTION. Default value is 1.\n\
                         OPTION 1: Manhattan distance heuristic\
@@ -214,8 +193,13 @@ def parse_user_options():
             Enable verbose mode. If program found a solution then it print all the steps \
             from start state to the goal state. If the solution is not found it will \
             notice you with a message.')
+    parser.add_argument('-e', '--run-tests', action='store_true', help='Run tests')
     
     args = parser.parse_args()
+
+    if args.run_tests:
+        test_is_solvable()
+        return
 
     if args.initial_state:
         initial_state = [int(number) for number in args.initial_state.split(',')]
@@ -241,4 +225,3 @@ def parse_user_options():
 
 if __name__ == '__main__':
     parse_user_options()
-    # test_is_solvable()
