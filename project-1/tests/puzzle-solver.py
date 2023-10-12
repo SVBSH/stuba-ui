@@ -77,7 +77,7 @@ def is_solvable(game_plan: GamePlan) -> int:
     return inversions % 2 == 0
 
 
-def test_is_solvable():
+def test_is_not_solvable():
     permutations_list = list(permutations(range(9)))
     # Filter out the permutations that are not solvable
     not_solvable = [p for p in permutations_list if not is_solvable(p)]
@@ -88,7 +88,20 @@ def test_is_solvable():
         assert(solve_puzzle(combination, heuristic_manhattan_distance) is None)
         assert(solve_puzzle(combination, heuristic_misplaced_positions) is None)
     print('Tests passed')
-    
+
+
+def test_is_solvable():
+    permutations_list = list(permutations(range(9)))
+    # Filter out the permutations that are not solvable
+    solvable_states = [p for p in permutations_list if is_solvable(p)]
+    # Convert the not solvable permutations to a list
+    solvable_states_list = [list(p) for p in solvable_states]
+
+    for combination in solvable_states_list:
+        assert(solve_puzzle(combination, heuristic_manhattan_distance) is not None)
+        assert(solve_puzzle(combination, heuristic_misplaced_positions) is not None)
+    print('Tests passed')
+
 
 
 def get_neighbors_of_blank_tile(game_plan_side_length: int, empty_tile_index: int) -> List[int]:
@@ -193,12 +206,15 @@ def parse_user_options():
             Enable verbose mode. If program found a solution then it print all the steps \
             from start state to the goal state. If the solution is not found it will \
             notice you with a message.')
-    parser.add_argument('-e', '--run-tests', action='store_true', help='Run tests')
+    parser.add_argument('-e', '--run-tests', type=int, choices=[1, 2], default=1, help='Run tests')
     
     args = parser.parse_args()
 
     if args.run_tests:
-        test_is_solvable()
+        if args.run_tests == 1:
+            test_is_not_solvable()
+        elif args.run_tests == 2:
+            test_is_solvable()
         return
 
     if args.initial_state:
