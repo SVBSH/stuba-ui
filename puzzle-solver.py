@@ -103,7 +103,6 @@ def test_is_solvable():
     print('Tests passed')
 
 
-
 def get_neighbors_of_blank_tile(game_plan_side_length: int, empty_tile_index: int) -> List[int]:
     neighbors: List[int] = []
     move_left: bool = empty_tile_index % game_plan_side_length > 0
@@ -127,6 +126,8 @@ def solve_puzzle(initial_state: GamePlan, heuristic: Callable[[GamePlan], int]) 
     """
     game_plan_length = len(initial_state)
     game_plan_side_length = int(sqrt(game_plan_length))
+
+    
     if not is_solvable(initial_state):
         return None
     
@@ -206,7 +207,8 @@ def parse_user_options():
             Enable verbose mode. If program found a solution then it print all the steps \
             from start state to the goal state. If the solution is not found it will \
             notice you with a message.')
-    parser.add_argument('-e', '--run-tests', type=int, choices=[1, 2], default=1, help='Run tests')
+    parser.add_argument('-e', '--run-tests', type=int, choices=[1, 2], help='Run tests. \
+                        OPTION 1: test not solvable states. OPTION 2: test all solvable states with both heuristics')
     
     args = parser.parse_args()
 
@@ -232,8 +234,8 @@ def parse_user_options():
         solution = solve_puzzle(initial_state, heuristic_function)
     
     if args.verbose:
-        print('Solution was found!\nSteps:\n')
         if solution is not None:
+            print('Solution was found!\nSteps:\n')
             print_solution_steps(solution)
         else:
             print('The game is not solvable')
