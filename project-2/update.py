@@ -122,34 +122,25 @@ def tabu_search(
     return best_solution, best_cost
 
 
-def get_random_city_coordinates() -> Cities:
-    return [(random.randint(0, 500), random.randint(0, 500)) for _ in range(CONFIG['city_count'])]
+def get_city_coordinates() -> Cities:
+    if CONFIG['randomized_cities']:
+        return [(random.randint(0, 500), random.randint(0, 500)) for _ in range(CONFIG['city_count'])]
 
-
-if __name__ == "__main__":
-    # List of city coordinates
-    # cities_coordinates = [(random.randint(0, 500), random.randint(0, 500)) for _ in range(10)]
-
-    # if config.random:
-
-
-    cities_coordinates = [
+    return [
         (60, 200), (180, 200), (100, 180), (140, 180), (20, 160), 
         (80, 160), (200, 160), (140, 140), (40, 120), (120, 120), 
         (180, 100), (60, 80), (100, 80), (180, 60), (20, 40), 
         (100, 40), (200, 40), (20, 20), (60, 20), (160, 20)]
-    
 
-    if CONFIG['randomized_cities']:
-        cities_coordinates = get_random_city_coordinates()
-    
 
-    # Create the distance matrix
+def get_initial_solution(cities: Cities) -> List[int]:
+    return list(range(len(cities)))
+
+
+if __name__ == "__main__":
+    cities_coordinates = get_city_coordinates()
     distance_matrix = create_distance_matrix(cities_coordinates)
-
-    # Initial solution
-    initial_solution: List[int] = list(range(len(cities_coordinates)))
-
+    initial_solution = get_initial_solution(cities_coordinates)
     # Create the Tkinter window
     window = tk.Tk()
     window.title("Tabu Search Visualization")
@@ -158,23 +149,15 @@ if __name__ == "__main__":
     canvas = tk.Canvas(window, width=500, height=500)
     canvas.pack()
 
-    # Draw the initial route
-    lines = []
-
     # Perform Tabu Search with live drawing
     best_solution, best_cost = tabu_search(
-        distance_matrix, 
-        initial_solution, 
-        window, 
-        canvas, 
+        distance_matrix,
+        initial_solution,
+        window,
+        canvas,
         cities_coordinates,
         CONFIG['debug']
     )
 
-    # Display the best route
-    # draw_route(canvas, cities_coordinates, best_solution, lines)
-
     print("Best solution:", best_solution)
     print("Best cost:", best_cost)
-
-    # Start the Tkinter event loop
