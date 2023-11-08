@@ -49,7 +49,6 @@ def parse_arguments() -> Namespace:
 
     Validation is done by using custom type functions:
     https://docs.python.org/3/library/argparse.html#type
-
     """
     parser = ArgumentParser(
         prog="Travelling Salesman Problem Solver",
