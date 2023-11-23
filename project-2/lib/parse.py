@@ -1,4 +1,3 @@
-# argparse exceptions 
 from argparse import ArgumentTypeError 
 # argparse types
 from argparse import Namespace, ArgumentParser
@@ -15,6 +14,8 @@ class GlobalConfig(TypedDict):
     city_count: int
     debug: bool
     randomized_cities: bool
+    max_iterations: int
+    algorithm: str
 
 
 def check_map_size(value: str) -> Tuple[int, int]:
@@ -57,8 +58,8 @@ def parse_arguments() -> Namespace:
     
     parser.add_argument("-s", "--map-size", 
                         type=check_map_size, 
-                        default="10,10",
-                        help="Define map width and height (format: width,height). Default is 10,10.")
+                        default="500,500",
+                        help="Define map width and height (format: width,height). Default is 500,500.")
     
     parser.add_argument("-c", "--city-count", 
                         type=check_city_count, 
@@ -72,20 +73,40 @@ def parse_arguments() -> Namespace:
     parser.add_argument("-r", "--randomized-cities", 
                         action='store_true',
                         help="Generate a random city coordinates for the CITY_COUNT")
+    
+    parser.add_argument("-m", "--max-iterations",
+                        type=int,
+                        default=100,
+                        help="The maximum amount of program iterations")
+
+    # Add subparsers for supported algorithms
+    subparsers = parser.add_subparsers(dest='algorithm', required=True, help='Choose an algorithm.')
+
+    ### subparser for Tabu Search ###
+    parser_tabu_search = subparsers.add_parser('ts', help='Use Tabu Search algorithm')
+    parser_tabu_search.add_argument('--tabu-size', type=int, default=100, help='The maximum size of the Tabu List')
+
+    ### subparser for Simulated Annealing ###
+    parser_sim_annealing = subparsers.add_parser('sa', help='Use Simulated Annealing algorithm')
+    parser_sim_annealing.add_argument('--cooling-factor', type=float, help='Cooling factor')
 
     return parser.parse_args()
 
 
 def get_config():
     args = parse_arguments()
+
     config: GlobalConfig = {
         'plan_width': args.map_size[0],
         'plan_height': args.map_size[1],
         'city_count': args.city_count,
         'debug': args.debug,
-        'randomized_cities': args.randomized_cities
+        'randomized_cities': args.randomized_cities,
+        'max_iterations': args.max_iterations,
+        'algorithm': args.algorithm
     }
-    print('Game plan configuration:', config)
+    if args.debug:
+        print('Game plan configuration:', config)
     return config
 
 

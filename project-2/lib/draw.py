@@ -9,7 +9,13 @@ class DrawConfig(TypedDict):
     canvas: tk.Canvas
 
 
-def draw_route(draw_config: DrawConfig, cities: Cities, route, redraw_time=0.1):
+def draw_route(
+        draw_config: DrawConfig, 
+        cities: Cities, 
+        route, 
+        iteration,
+        max_iterations,
+        redraw_time=0.1):
     """Draw the tour between cities"""
     draw_config['canvas'].delete("all")
 
@@ -29,7 +35,19 @@ def draw_route(draw_config: DrawConfig, cities: Cities, route, redraw_time=0.1):
         prev_city = scaled_cities[route[i]]
         curr_city = scaled_cities[route[i + 1]]
         draw_config['canvas'].create_line(prev_city, curr_city, fill='#02A9EA', width=2)
-    
+
+    canvas_width = draw_config['canvas'].winfo_width()
+
+    # Display the number of iterations in the top right corner
+    iteration_text = f"Iteration: {iteration}/{max_iterations}"
+    algorithm = 'Algorithm: Tabu Search'
+
+    draw_config['canvas'].create_text(
+        canvas_width - 20, 20, text=algorithm, anchor="ne", font=("Roboto", "16"), fill="black")
+    draw_config['canvas'].create_text(
+        canvas_width - 20, 50, text=iteration_text, anchor="ne", font=("Roboto", "16"), fill="black")
+
+
     draw_config['window'].update()
     time.sleep(redraw_time)
 
@@ -39,6 +57,6 @@ def initialize_canvas() -> DrawConfig:
     draw_config['window'] = tk.Tk()
     draw_config['window'].title("Traveling Salesman Problem Visualization")
 
-    draw_config['canvas'] = tk.Canvas(draw_config['window'], width=500, height=500, background='#D8D2E1')
+    draw_config['canvas'] = tk.Canvas(draw_config['window'], width=800, height=800, background='#D8D2E1')
     draw_config['canvas'].pack()
     return draw_config
