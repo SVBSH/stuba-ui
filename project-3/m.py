@@ -3,16 +3,8 @@ from lib.draw import plot_clusters_1
 import numpy as np
 from typing import Tuple
 
+from lib.parse import process_command_line_arguments
 
-
-# def adjust_range(value, space_range, offset_range):
-#     """Adjust the range for offset to ensure the new point is within the space range."""
-#     low, high = offset_range
-#     if value + low < space_range[0]:
-#         low = space_range[0] - value
-#     if value + high > space_range[1]:
-#         high = space_range[1] - value
-#     return low, high
 
 def adjust_range(base_point_axis: int, space_range: Tuple[int, int], offset_range: Tuple[int, int]):
     min_offset = offset_range[0]
@@ -60,44 +52,46 @@ def generate_random_points(num_points: int,
     return np.array(points)
 
 def manhattan_distance(point1, point2):
-    """Calculate the Manhattan distance between two points using NumPy for efficiency."""
+    """
+    Calculate the Manhattan dstance between two points
+    """
     return np.sum(np.abs(point1 - point2))
 
 def calculate_centroid(cluster):
-    """Calculate the centroid of a given cluster using NumPy for efficiency."""
+    """
+    Calculate the centroid of a given cluster
+    """
     return np.mean(cluster, axis=0)
     
 
-def hac_optimized_with_options(data, max_clusters, use_medoids=False):
-    """Optimized HAC with options to use centroids or medoids."""
+def hierarchical_clustering(data, max_clusters, use_medoids=False):
     data = np.array(data)
     n_points = len(data)
-    clusters = {i: [i] for i in range(n_points)}  # Dictionary to keep track of clusters
+    # keep track of clusters
+    clusters = {cluster_index: [cluster_index] for cluster_index in range(n_points)} 
 
-    # Function to calculate the centroid or medoid of a cluster
     def calculate_centroid(cluster_indices):
-        """Calculate the centroid of the cluster."""
+        """calculate the centroid of the cluster"""
         return np.mean(data[cluster_indices], axis=0)
 
     def calculate_medoid(cluster_indices):
-        """Calculate the medoid of the cluster."""
+        """calculate the medoid of the cluster"""
         cluster_data = data[cluster_indices]
         distance_matrix = np.sum(np.abs(cluster_data[:, np.newaxis] - cluster_data), axis=2)
         medoid_index = np.argmin(np.sum(distance_matrix, axis=1))
         return cluster_data[medoid_index]
 
-    # Choose the appropriate heuristic function
+    # choose the heuristic function
     calculate_cluster_center = calculate_medoid if use_medoids else calculate_centroid
 
-
-    # Precompute all distances and store in a dictionary
+    # preprocess all distances and store them in the dictionary
     distances = {}
     for i in range(n_points):
         for j in range(i+1, n_points):
             distance = manhattan_distance(data[i], data[j])
             distances[(i, j)] = distance
 
-    # Create a min heap for distances
+    # create a heap for distances
     distance_heap = [(dist, i, j) for (i, j), dist in distances.items()]
     heapq.heapify(distance_heap)
 
@@ -124,21 +118,30 @@ def hac_optimized_with_options(data, max_clusters, use_medoids=False):
                 heapq.heappush(distance_heap, (new_distance, min(i, k), max(i, k)))
 
     # Prepare final clusters list
-    final_clusters = [data[indices] for indices in clusters.values()]
-    return final_clusters
-# Example data (feel free to replace with your data)
-coordinates = [[2, 6], [3, 4], [3, 8], [4, 7], [6, 2], [7, 4], [8, 5], [9, 7]]
-space_range = (-5000, 5000)
-initial_points = 20
-additional_points = 5000
-offset_range = (-100, 100)
-coordinates = generate_random_points(initial_points, space_range, additional_points, offset_range)
+    return [data[index] for index in clusters.values()]
 
-# Perform HAC with a maximum number of clusters
-max_clusters = 12  # For example, let's stop clustering when there are 3 clusters
 
-# Use the previously defined hac_with_max_clusters function
-hac_clusters = hac_optimized_with_options(coordinates, max_clusters, use_medoids=True)
+if __name__ == '__main__':
 
-# Plot the clusters
-plot_clusters_1(hac_clusters)
+    # Example usage
+    args = process_command_line_arguments()
+    print("Additional Points:", args.additional_points)
+    print("Use Medoids:", args.use_medoids)
+
+    coordinates = [[2, 6], [3, 4], [3, 8], [4, 7], [6, 2], [7, 4], [8, 5], [9, 7]]
+    space_range = (-5000, 5000)
+    initial_points = 20
+    additional_points = 5000
+    offset_range = (-100, 100)
+    coordinates = generate_random_points(initial_points, space_range, additional_points, offset_range)
+
+    
+
+    # maximum number of clusters
+    max_clusters = 400
+
+    # Use the previously defined hac_with_max_clusters function
+    hac_clusters = hierarchical_clustering(coordinates, max_clusters, use_medoids=True)
+
+    # Plot the clusters
+    plot_clusters_1(hac_clusters)
