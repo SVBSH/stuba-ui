@@ -1,5 +1,5 @@
 import heapq
-from lib.draw import plot_clusters_1
+from lib.draw import plot_clusters
 import numpy as np
 from typing import Tuple
 
@@ -143,4 +143,4 @@ if __name__ == '__main__':
     hac_clusters = hierarchical_clustering(coordinates, max_clusters, use_medoids=args.use_medoids)
 
     # Plot the clusters
-    plot_clusters_1(hac_clusters)
+    plot_clusters(hac_clusters)

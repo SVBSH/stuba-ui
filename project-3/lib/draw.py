@@ -3,7 +3,7 @@ import matplotlib.cm as cm
 import matplotlib.pyplot as plt
 
 
-def plot_clusters_1(clusters):
+def plot_clusters(clusters):
     """
     Show the result of hierarchical clustering using 
     matplotlib.
