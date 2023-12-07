@@ -128,7 +128,6 @@ if __name__ == '__main__':
     print("Additional Points:", args.additional_points)
     print("Use Medoids:", args.use_medoids)
 
-    coordinates = [[2, 6], [3, 4], [3, 8], [4, 7], [6, 2], [7, 4], [8, 5], [9, 7]]
     space_range = (-5000, 5000)
     initial_points = 20
     additional_points = args.additional_points
